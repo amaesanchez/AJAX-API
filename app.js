@@ -1,18 +1,18 @@
 "use strict";
 
-const baseURL = "http://api.giphy.com/v1/gifs/search";
-const APIKey = "RjDukV642qX8mGf72Qt7SwTLhJ4pi4fQ";
-const gifListLength = 50;
+const BASE_URL = "http://api.giphy.com/";
+const API_KEY = "RjDukV642qX8mGf72Qt7SwTLhJ4pi4fQ";
+const GIF_LIST_LENGTH = 50;
 
 /** makes get request for giphy URL with user input as
  * query string
  */
 
-async function searchGiphy() {
-  let searchResult = $("#input").val();
+async function getGiphy() {
+  const searchResult = $("#input").val();
 
-  const response = await axios.get(baseURL, {
-    params: { q: searchResult, api_key: APIKey },
+  const response = await axios.get(`${BASE_URL}v1/gifs/search`, {
+    params: { q: searchResult, api_key: API_KEY },
   });
 
   return response.data.data;
@@ -20,13 +20,13 @@ async function searchGiphy() {
 
 /** gets random gif object from gif array inside the GET object */
 function randomImg(gifList) {
-  return gifList[Math.floor(Math.random() * gifListLength)];
+  return gifList[Math.floor(Math.random() * GIF_LIST_LENGTH)];
 }
 
 /** appends image with gif url to the image container div in body */
 function addGiphy(gif) {
-  const gifURL = gif.images.downsized.url;
-  const $gifImg = $("<img>").attr("src", gifURL);
+  const gifURL = gif.images.original.url;
+  const $gifImg = $("<img>", {src: gifURL}); // easier way to add attr
 
   $("#img-container").append($gifImg);
 }
@@ -40,19 +40,19 @@ function removeImgs() {
  * revents refresh bc submit button default behavior is
  * to refresh page
  *
- * invokes searchGiphy, randomImg, and addGiphy to append randomized img
- * to DOM based on user input
+ * on form submit, invokes getGiphy, randomImg, and addGiphy to append
+ * randomized img to DOM based on user input
  */
 
-async function displayGiphy(evt) {
+async function handleSubmit(evt) {
   evt.preventDefault();
-  let gifList = await searchGiphy();
-  let gifData = randomImg(gifList);
+  const gifList = await getGiphy();
+  const gifData = randomImg(gifList);
   addGiphy(gifData);
 }
 
 /** event listener for submit button */
-$("#search").on("click", displayGiphy);
+$("#search").on("click", handleSubmit);
 
 /** event listener for removing all images */
 $("#remove").on("click", remove);
